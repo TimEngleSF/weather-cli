@@ -11,12 +11,34 @@ func (m *model) View() string {
 	if m.width == 0 {
 		return "loading..."
 	}
+
+	if m.unitSelection == "" {
+		var cb strings.Builder
+		qs := "Which units would you like the weather displayed in?\n"
+		cb.WriteString("")
+		for i, choice := range m.unitChoices {
+			line := "  " + choice
+			if m.cursor == i {
+				line = "> " + m.highlightStyle.Render(choice)
+			}
+			cb.WriteString(line + "\n")
+		}
+
+		return lipgloss.Place(
+			m.width,
+			m.height,
+			lipgloss.Center,
+			lipgloss.Center,
+
+			lipgloss.JoinVertical(lipgloss.Left, lipgloss.NewStyle().Bold(true).Render(qs), m.cBorderStyle.Render(cb.String())),
+		)
+	}
 	/* ZIP CITY */
-	if !m.initialSelected {
+	if !m.isLocSelected {
 		var cb strings.Builder
 		qs := "How would you like to search for the weather?\n"
 		cb.WriteString("")
-		for i, choice := range m.choices {
+		for i, choice := range m.locChoices {
 			line := "  " + choice
 			if m.cursor == i {
 				if i == 0 {
@@ -38,7 +60,7 @@ func (m *model) View() string {
 		)
 	}
 
-	if m.initialSelection == 0 && m.location.zipcode == "" {
+	if m.locSelection == 0 && m.location.zipcode == "" {
 		in := m.location.input
 		inputField := in.View() // Render the input field
 
