@@ -12,7 +12,7 @@ import (
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Check if we need to reset to unit selection
-	if  m.resetUnit {
+	if m.resetUnit {
 		m.unitSelection = ""
 		m.isLocSelected = false
 		// need to change locSelection, if it stays at selected position that triggers m.resetUnit to true, a loop will be created
@@ -89,10 +89,17 @@ func (m *model) handleLocationSelection(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // Handles direct zipcode input for location.
 func (m *model) handleZipcodeInput(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.locSelection == 0 && m.location.zipcode == "" {
+	if m.locSelection == 0 && m.Location.Zipcode == "" {
 		return m.processZipcodeInput(msg)
 	}
-	return m.handleGlobalKeys(msg)
+	updatedModel, cmd := m.handleGlobalKeys(msg)
+	m, ok := updatedModel.(*model)
+	if !ok {
+		log.Fatalf("Update: Unable to assert model type during '%s'", "handleZipcodeInput")
+	}
+
+	m.SetCurrWeatherByZip()
+	return m, cmd
 }
 
 // Process user choice for either units or location.
@@ -114,7 +121,7 @@ func (m *model) processChoice(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 // Process direct input of zipcode.
 func (m *model) processZipcodeInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	in := m.location.input
+	in := m.Location.Input
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -133,7 +140,7 @@ func (m *model) handleZipcodeKey(msg tea.KeyMsg, in textinput.Model) (tea.Model,
 	// Check if the key press is a digit before updating the input model
 	if len(val) < 5 && isDigit(msg) || ms == "backspace" || ms == "ctrl+c" || ms == "enter" {
 		in, cmd = in.Update(msg)
-		m.location.input = in
+		m.Location.Input = in
 	}
 
 	if ms == "ctrl+c" {
@@ -141,7 +148,7 @@ func (m *model) handleZipcodeKey(msg tea.KeyMsg, in textinput.Model) (tea.Model,
 	}
 
 	if len(val) == 5 && (ms == "enter" || ms == " ") {
-		m.location.zipcode = in.Value()
+		m.Location.Zipcode = in.Value()
 		in.SetValue("")
 	}
 

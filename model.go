@@ -16,9 +16,8 @@ type model struct {
 	resetUnit      bool
 	cBorderStyle   lipgloss.Style
 	highlightStyle lipgloss.Style
-	weatherData    []WeatherResponse
-	location       Location
-	done           bool
+	weatherData    WeatherResponse
+	Location       Location
 	isLocSelected  bool
 	locSelection   int
 	width          int
@@ -26,12 +25,14 @@ type model struct {
 }
 
 type Location struct {
-	zipcode    string
-	city       string
-	state      string
-	country    string
-	input      textinput.Model
-	inputStyle lipgloss.Style
+	Zipcode    string `json:"zip"`
+	City       string `json:"name"`
+	State      string
+	Country    string  `json:"country"`
+	Lat        float64 `json:"lat"`
+	Lon        float64 `json:"lon"`
+	Input      textinput.Model
+	InputStyle lipgloss.Style
 }
 
 func New() *model {
@@ -54,8 +55,10 @@ func New() *model {
 		locChoices:     []string{"zipcode", "city", "change units"},
 		unitChoices:    []string{"imperial", "metric", "kelvin"},
 		cBorderStyle:   cBorderStyle,
-		location:       Location{input: input},
+		Location:       Location{Input: input},
 		unitSelection:  u,
 		unitStyle:      unitStyle,
+		resetUnit:      false,
+		weatherData:    WeatherResponse{},
 	}
 }
