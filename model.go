@@ -12,6 +12,8 @@ type model struct {
 	locChoices     []string
 	unitSelection  string
 	unitChoices    []string
+	unitStyle      lipgloss.Style
+	resetUnit      bool
 	cBorderStyle   lipgloss.Style
 	highlightStyle lipgloss.Style
 	weatherData    []WeatherResponse
@@ -33,12 +35,9 @@ type Location struct {
 }
 
 func New() *model {
-	highlightColor := lipgloss.Color("12")
-	highlightStyle := lipgloss.NewStyle().Foreground(highlightColor)
-	cBorderStyle := lipgloss.NewStyle().
-		BorderForeground(lipgloss.Color("5")).
-		BorderStyle(lipgloss.NormalBorder()).
-		Width(80).Padding(0, 2).PaddingTop(1)
+	highlightStyle := HighlightStyle()
+	cBorderStyle := ChoiceBorderStyle()
+	unitStyle := UnitStyle()
 
 	input := textinput.New()
 	input.Prompt = lipgloss.NewStyle().Foreground(lipgloss.NoColor{}).Bold(true).Render("Zipcode: ")
@@ -46,13 +45,17 @@ func New() *model {
 	input.Focus()
 
 	u := helpers.GetUnits()
+	if u != "" && !helpers.ValidateUnits(u) {
+		u = ""
+	}
 
 	return &model{
 		highlightStyle: highlightStyle,
-		locChoices:     []string{"zipcode", "city"},
+		locChoices:     []string{"zipcode", "city", "change units"},
 		unitChoices:    []string{"imperial", "metric", "kelvin"},
 		cBorderStyle:   cBorderStyle,
 		location:       Location{input: input},
 		unitSelection:  u,
+		unitStyle:      unitStyle,
 	}
 }

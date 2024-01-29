@@ -11,16 +11,28 @@ import (
 // Main update function handling various states and inputs.
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
-	// Select unit type
+	// Check if we need to reset to unit selection
+	if  m.resetUnit {
+		m.unitSelection = ""
+		m.isLocSelected = false
+		// need to change locSelection, if it stays at selected position that triggers m.resetUnit to true, a loop will be created
+		m.locSelection = 0
+		m.cursor = 0
+		m.resetUnit = false
+	}
+
+	// Proceed with unit selection if it's not yet set
 	if m.unitSelection == "" {
 		return m.handleUnitSelection(msg)
 	}
-	// Select location type
+
+	// Proceed with location selection if unit is selected but location is not
 	if !m.isLocSelected {
 		return m.handleLocationSelection(msg)
-	} 
+	}
+
+	// Handle zipcode input last, assuming unit and location are selected
 	return m.handleZipcodeInput(msg)
-	
 }
 
 // Handles selction input for Units and Location Type
@@ -64,14 +76,15 @@ func (m *model) SelectChoices(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // Handles unit selection logic.
 func (m *model) handleUnitSelection(msg tea.Msg) (tea.Model, tea.Cmd) {
-	return m.processChoice("units", msg)
+	updatedModel, cmd := m.processChoice("units", msg)
+	helpers.WriteUnits(m.unitSelection) // Persist selected units
+	return updatedModel, cmd
 }
 
 // Handles location selection logic based on chosen method (zipcode or city).
 func (m *model) handleLocationSelection(msg tea.Msg) (tea.Model, tea.Cmd) {
-	updatedModel, cmd := m.processChoice("loc", msg)
-	helpers.WriteUnits(m.unitSelection) // Persist selected units
-	return updatedModel, cmd
+	return m.processChoice("loc", msg)
+
 }
 
 // Handles direct zipcode input for location.
@@ -79,13 +92,19 @@ func (m *model) handleZipcodeInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.locSelection == 0 && m.location.zipcode == "" {
 		return m.processZipcodeInput(msg)
 	}
-	return m.handleGlobalKeys(msg) 
+	return m.handleGlobalKeys(msg)
 }
 
 // Process user choice for either units or location.
 func (m *model) processChoice(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 	updatedModel, cmd := m.SelectChoices(ct, msg)
 	m, ok := updatedModel.(*model)
+	// if change unit was selected during location reset, set m.resetUnit to true
+	if ct == "loc" {
+		if m.locSelection == len(m.locChoices)-1 {
+			m.resetUnit = true
+		}
+	}
 	if !ok {
 		log.Fatalf("Update: Unable to assert model type for '%s'", ct)
 	}
@@ -123,7 +142,7 @@ func (m *model) handleZipcodeKey(msg tea.KeyMsg, in textinput.Model) (tea.Model,
 
 	if len(val) == 5 && (ms == "enter" || ms == " ") {
 		m.location.zipcode = in.Value()
-		in.SetValue("") 
+		in.SetValue("")
 	}
 
 	return m, cmd
