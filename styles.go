@@ -16,3 +16,15 @@ func HighlightStyle() lipgloss.Style {
 func UnitStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
 }
+
+func (m *model) FetchWeatherDisplay() string {
+	hc := lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+
+	return lipgloss.Place(
+		m.width,
+		m.height,
+		lipgloss.Center,
+		lipgloss.Center,
+		hc.Render("Fetching Weather..."),
+	)
+}

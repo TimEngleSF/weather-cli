@@ -12,7 +12,7 @@ func (m *model) View() string {
 	if m.width == 0 {
 		return "loading..."
 	}
-	/* UNIT SELECTION */ 
+	/* UNIT SELECTION */
 	if m.unitSelection == "" || m.resetUnit {
 		return m.renderUnitSelection()
 	}
@@ -20,12 +20,17 @@ func (m *model) View() string {
 	if !m.isLocSelected {
 		return m.renderLocSelection()
 	}
-	/* ZIPCODE INPUT */ 
-	if m.locSelection == 0 && m.location.zipcode == "" {
+	/* ZIPCODE INPUT */
+	if m.locSelection == 0 && m.Location.Zipcode == "" {
 		return m.renderZipInput()
 	}
 
-	return m.unitSelection
+	/* WEATHER FORECAST */
+	if m.weatherData.Name == "" {
+		return m.FetchWeatherDisplay()
+	}
+
+	return fmt.Sprintf("%+v", m.weatherData)
 }
 
 func (m *model) renderUnitSelection() string {
@@ -69,27 +74,29 @@ func (m *model) renderLocSelection() string {
 		lipgloss.Center,
 		lipgloss.Center,
 
-		lipgloss.JoinVertical(lipgloss.Left, un, lipgloss.NewStyle().Bold(true).Render(qs), m.cBorderStyle.Render(cb.String())),
+		lipgloss.JoinVertical(
+			lipgloss.Left, 
+			un, 
+			lipgloss.NewStyle().Bold(true).Render(qs), 
+			m.cBorderStyle.Render(cb.String()),
+		),
 	)
 }
 
 func (m *model) renderZipInput() string {
-	in := m.location.input
-	inputField := in.View() // Render the input field
+	in := m.Location.Input
+	inputField := in.View() 
 
-	// Define the style for the input field text
 	inputFieldStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("12")) // Set the foreground color
+		Foreground(lipgloss.Color("12"))
 
-	// Combine "Zipcode: " with the styled input field
 	displayText := inputFieldStyle.Render(inputField)
 
-	// Use the border style to render the combined text and place it
 	return lipgloss.Place(
 		m.width,
 		m.height,
 		lipgloss.Center,
 		lipgloss.Center,
-		m.cBorderStyle.Render(displayText), // Render the combined text with the border style
+		m.cBorderStyle.Render(displayText),
 	)
 }
