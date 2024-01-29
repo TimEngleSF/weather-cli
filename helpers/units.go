@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -15,7 +14,6 @@ func GetUnits() (string){
 		return ""
 	}
 	
-	fmt.Println(f)
 	units = string(f)
 	return units
 }
@@ -27,4 +25,8 @@ func WriteUnits(units string) string {
 		os.Exit(1)
 	}
 	return units
+}
+
+func ValidateUnits(units string) bool {
+	return units == "imperial" || units == "celcius" || units == "kelvin"
 }
