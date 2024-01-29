@@ -28,5 +28,7 @@ go.work
 # Thumbnails
 ._*
 
+# app files
 .env
 debug.log
+units.txt
