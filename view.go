@@ -25,6 +25,19 @@ func (m *model) View() string {
 		return m.renderZipInput()
 	}
 
+	// if m.locSelection == 1 {
+	// 	in := m.Location.CityInput
+	// 	inputField := in.View()
+
+	// 	return lipgloss.Place(
+	// 		m.width,
+	// 		m.height,
+	// 		lipgloss.Center,
+	// 		lipgloss.Center,
+	// 		m.cBorderStyle.Render(inputField),
+	// 	)
+	// }
+
 	/* WEATHER FORECAST */
 	if m.weatherData.Name == "" {
 		return m.FetchWeatherDisplay()
@@ -84,7 +97,7 @@ func (m *model) renderLocSelection() string {
 }
 
 func (m *model) renderZipInput() string {
-	in := m.Location.Input
+	in := m.Location.ZipInput
 	inputField := in.View()
 
 	inputFieldStyle := lipgloss.NewStyle().

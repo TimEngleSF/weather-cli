@@ -68,7 +68,7 @@ func (m *model) WeatherCard() string {
 	cardWidth := 50
 
 	lineStyle := lipgloss.NewStyle().
-		Width(cardWidth - 8). // Adjust for padding 
+		Width(cardWidth - 8). // Adjust for padding
 		PaddingLeft(4).       // Match card padding
 		PaddingRight(4).
 		Bold(true).
@@ -76,12 +76,12 @@ func (m *model) WeatherCard() string {
 		Foreground(lipgloss.Color(cFgColor)).
 		Align(lipgloss.Left)
 
-	nStr := lineStyle.Copy().Render(n)
-	tCStr := lineStyle.Render(fmt.Sprintf("Current: %v", t.Current))
+	nStr := lineStyle.Render(n)
+	tCStr := lineStyle.Copy().PaddingBottom(1).Render(fmt.Sprintf("Current: %v", t.Current))
 	tLStr := lineStyle.Render(fmt.Sprintf("Low: %v", t.Min))
 	tHStr := lineStyle.Render(fmt.Sprintf("High: %v", t.Max))
-	wMainStr := lineStyle.Foreground(lipgloss.Color(mFgColor)).Render(w.Main)
-	wDescStr := lineStyle.Render(w.Description)
+	wDescStr := lineStyle.Copy().PaddingBottom(1).Render(w.Description)
+	wMainStr := lineStyle.Copy().Foreground(lipgloss.Color(mFgColor)).Render(w.Main)
 
 	cardContent := lipgloss.JoinVertical(lipgloss.Left, nStr, tCStr, wMainStr, wDescStr, tHStr, tLStr)
 
@@ -92,7 +92,7 @@ func (m *model) WeatherCard() string {
 		PaddingRight(4).
 		PaddingTop(1).
 		PaddingBottom(1).
-		Align(lipgloss.Center)
+		Align(lipgloss.Center).MarginBottom(2)
 
 	card := cardStyle.Render(cardContent)
 
@@ -101,6 +101,6 @@ func (m *model) WeatherCard() string {
 		m.height,
 		lipgloss.Center,
 		lipgloss.Center,
-		card,
+		lipgloss.JoinVertical(lipgloss.Center, card, "Press a key to find more forecasts"),
 	)
 }

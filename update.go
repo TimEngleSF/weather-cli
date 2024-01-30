@@ -32,7 +32,23 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	// Handle zipcode input last, assuming unit and location are selected
-	return m.handleZipcodeInput(msg)
+	if m.isLocSelected && m.locSelection == 0 && m.weatherData.Name == "" {
+		m.Location.ZipInput.Focus()
+		return m.handleZipcodeInput(msg)
+	}
+
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.height = msg.Height
+		m.width = msg.Width
+	case tea.KeyMsg:
+		m.ClearLocWeatherData()
+		return m, nil
+
+	}
+
+	return m, nil
+
 }
 
 // Handles selction input for Units and Location Type
@@ -61,7 +77,7 @@ func (m *model) SelectChoices(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor < len(choices)-1 {
 				m.cursor++
 			}
-		case "enter", "space":
+		case "enter":
 			if ct == "loc" {
 				m.isLocSelected = true
 				m.locSelection = m.cursor
@@ -106,6 +122,7 @@ func (m *model) handleZipcodeInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *model) processChoice(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 	updatedModel, cmd := m.SelectChoices(ct, msg)
 	m, ok := updatedModel.(*model)
+	log.Println(m.locSelection)
 	// if change unit was selected during location reset, set m.resetUnit to true
 	if ct == "loc" {
 		if m.locSelection == len(m.locChoices)-1 {
@@ -121,7 +138,7 @@ func (m *model) processChoice(ct string, msg tea.Msg) (tea.Model, tea.Cmd) {
 // Process direct input of zipcode.
 func (m *model) processZipcodeInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	in := m.Location.Input
+	in := m.Location.ZipInput
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -140,7 +157,7 @@ func (m *model) handleZipcodeKey(msg tea.KeyMsg, in textinput.Model) (tea.Model,
 	// Check if the key press is a digit before updating the input model
 	if len(val) < 5 && isDigit(msg) || ms == "backspace" || ms == "ctrl+c" || ms == "enter" {
 		in, cmd = in.Update(msg)
-		m.Location.Input = in
+		m.Location.ZipInput = in
 	}
 
 	if ms == "ctrl+c" {
@@ -172,4 +189,15 @@ func (m *model) handleGlobalKeys(msg tea.Msg) (tea.Model, tea.Cmd) {
 // Utility function to check if a key press is a digit.
 func isDigit(keyMsg tea.KeyMsg) bool {
 	return keyMsg.Type == tea.KeyRunes && len(keyMsg.Runes) == 1 && keyMsg.Runes[0] >= '0' && keyMsg.Runes[0] <= '9'
+}
+
+func (m *model) ClearLocWeatherData() {
+	m.weatherData = WeatherResponse{}
+	m.Location.Zipcode = ""
+	m.Location.City = ""
+	m.Location.ZipInput.SetValue("")
+	// m.Location.CityInput.SetValue("")
+	m.Location.Lat = 0
+	m.Location.Lon = 0
+	m.isLocSelected = false
 }

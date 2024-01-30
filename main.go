@@ -7,7 +7,7 @@ import (
 )
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.Batch(tea.EnterAltScreen)
 }
 
 /* MAIN */

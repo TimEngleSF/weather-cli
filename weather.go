@@ -28,25 +28,6 @@ type WeatherResponse struct {
 	Style lipgloss.Style
 }
 
-func (m *model) SetLocation() {
-	var err error
-	err = godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-	api_key := os.Getenv("API_KEY")
-
-	var url string
-	if len(m.Location.Zipcode) == 5 {
-		url = fmt.Sprintf("http://api.openweathermap.org/geo/1.0/zip?zip=%s,%s&appid=%s", m.Location.Zipcode, "us", api_key)
-	}
-
-	err = requests.URL(url).ToJSON(&m.Location).Fetch(context.TODO())
-
-	if err != nil {
-		log.Println("SetLocation: ", err)
-	}
-}
 
 func (m *model) SetCurrWeatherByZip() {
 	var err error
@@ -55,8 +36,6 @@ func (m *model) SetCurrWeatherByZip() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 	api_key := os.Getenv("API_KEY")
-
-	m.SetLocation()
 
 	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?zip=%s,%s&appid=%s&units=%s", m.Location.Zipcode, "us", api_key, m.unitSelection)
 
