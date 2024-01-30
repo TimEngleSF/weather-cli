@@ -30,7 +30,7 @@ func (m *model) View() string {
 		return m.FetchWeatherDisplay()
 	}
 
-	return fmt.Sprintf("%+v", m.weatherData)
+	return m.WeatherCard()
 }
 
 func (m *model) renderUnitSelection() string {
@@ -75,9 +75,9 @@ func (m *model) renderLocSelection() string {
 		lipgloss.Center,
 
 		lipgloss.JoinVertical(
-			lipgloss.Left, 
-			un, 
-			lipgloss.NewStyle().Bold(true).Render(qs), 
+			lipgloss.Left,
+			un,
+			lipgloss.NewStyle().Bold(true).Render(qs),
 			m.cBorderStyle.Render(cb.String()),
 		),
 	)
@@ -85,7 +85,7 @@ func (m *model) renderLocSelection() string {
 
 func (m *model) renderZipInput() string {
 	in := m.Location.Input
-	inputField := in.View() 
+	inputField := in.View()
 
 	inputFieldStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("12"))
